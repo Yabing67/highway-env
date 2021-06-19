@@ -1,3 +1,14 @@
+# -*- coding: utf-8 -*-
+"""
+-------------------------------------------------
+   File Name：     stablebaselines_exit_attention_ppo_yb
+   Description :
+   Author :       yabing
+   date：          2021/5/5
+-------------------------------------------------
+
+"""
+
 import gym
 import torch as th
 from stable_baselines3 import PPO
@@ -275,7 +286,7 @@ def make_configure_env(**kwargs):
 
 
 env_kwargs = {
-    'id': 'highway-v0',
+    'id': 'exit-v0',
     'config': {
         "lanes_count": 3,
         "vehicles_count": 15,
@@ -318,13 +329,13 @@ if __name__ == "__main__":
                     learning_rate=2e-3,
                     policy_kwargs=policy_kwargs,
                     verbose=2,
-                    tensorboard_log="./highway_attention_ppo/")
+                    tensorboard_log="./exit_attention_ppo_easy/")
         # Train the agent
         model.learn(total_timesteps=200*1000)
         # Save the agent
-        model.save("ppo-highway")
+        model.save("ppo-exit_easy")
 
-    model = PPO.load("ppo-highway")
+    model = PPO.load("ppo-exit_easy")
     env = make_configure_env(**env_kwargs)
     for _ in range(5):
         obs = env.reset()
@@ -332,4 +343,5 @@ if __name__ == "__main__":
         while not done:
             action, _ = model.predict(obs)
             obs, reward, done, info = env.step(action)
+            # print(info)
             env.render()

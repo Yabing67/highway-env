@@ -1,3 +1,14 @@
+# -*- coding: utf-8 -*-
+"""
+-------------------------------------------------
+   File Name：     merge_custom
+   Description :
+   Author :       yabing
+   date：          2021/4/28
+-------------------------------------------------
+
+"""
+
 import numpy as np
 from gym.envs.registration import register
 
@@ -9,7 +20,7 @@ from highway_env.vehicle.controller import ControlledVehicle
 from highway_env.vehicle.objects import Obstacle
 
 
-class MergeEnv(AbstractEnv):
+class MergeCustom(AbstractEnv):
 
     """
     A highway merge negotiation environment.
@@ -71,7 +82,7 @@ class MergeEnv(AbstractEnv):
         net = RoadNetwork()
 
         # Highway lanes
-        ends = [150, 80, 80, 150]  # Before, converging, merge, after
+        ends = [550, 280, 280, 550]  # Before, converging, merge, after
         c, s, n = LineType.CONTINUOUS_LINE, LineType.STRIPED, LineType.NONE
         y = [0, StraightLane.DEFAULT_WIDTH]
         line_type = [[c, s], [n, c]]
@@ -108,6 +119,7 @@ class MergeEnv(AbstractEnv):
         road.vehicles.append(ego_vehicle)
 
         other_vehicles_type = utils.class_from_path(self.config["other_vehicles_type"])
+        # make random speed and number of vehicle
         road.vehicles.append(other_vehicles_type(road, road.network.get_lane(("a", "b", 0)).position(90, 0), speed=29))
         road.vehicles.append(other_vehicles_type(road, road.network.get_lane(("a", "b", 1)).position(70, 0), speed=31))
         road.vehicles.append(other_vehicles_type(road, road.network.get_lane(("a", "b", 0)).position(5, 0), speed=31.5))
@@ -119,6 +131,6 @@ class MergeEnv(AbstractEnv):
 
 
 register(
-    id='merge-v0',
-    entry_point='highway_env.envs:MergeEnv',
+    id='merge_custom-v0',
+    entry_point='highway_env.envs:MergeCustom',
 )

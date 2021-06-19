@@ -12,6 +12,9 @@ from highway_env.vehicle.kinematics import Vehicle
 
 
 class IntersectionEnv(AbstractEnv):
+    COLLISION_REWARD: float = -5
+    HIGH_SPEED_REWARD: float = 1
+    ARRIVED_REWARD: float = 1
 
     ACTIONS: Dict[int, str] = {
         0: 'SLOWER',
@@ -52,9 +55,7 @@ class IntersectionEnv(AbstractEnv):
             "screen_height": 600,
             "centering_position": [0.5, 0.6],
             "scaling": 5.5 * 1.3,
-            "collision_reward": -5,
-            "high_speed_reward": 1,
-            "arrived_reward": 1,
+            "collision_reward": IntersectionEnv.COLLISION_REWARD,
             "normalize_reward": False
         })
         return config
@@ -66,10 +67,10 @@ class IntersectionEnv(AbstractEnv):
 
     def _agent_reward(self, action: int, vehicle: Vehicle) -> float:
         reward = self.config["collision_reward"] * vehicle.crashed \
-                 + self.config["high_speed_reward"] * (vehicle.speed_index == vehicle.SPEED_COUNT - 1)
-        reward = self.config["arrived_reward"] if self.has_arrived(vehicle) else reward
+                 + self.HIGH_SPEED_REWARD * (vehicle.speed_index == vehicle.SPEED_COUNT - 1)
+        reward = self.ARRIVED_REWARD if self.has_arrived(vehicle) else reward
         if self.config["normalize_reward"]:
-            reward = utils.lmap(reward, [self.config["collision_reward"], self.config["arrived_reward"]], [0, 1])
+            reward = utils.lmap(reward, [self.config["collision_reward"], self.ARRIVED_REWARD], [0, 1])
         return reward
 
     def _is_terminal(self) -> bool:

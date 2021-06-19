@@ -40,6 +40,16 @@ class ExitEnv(HighwayEnv):
         return config
 
     def _reset(self) -> None:
+        # TODO: add lower speed also
+        # high_speed
+        vehicles_density = np.random.uniform(0.3, 0.4)
+        avg_speed = 30.
+        if np.random.random() < 0.5:  # low_speed
+            vehicles_density = np.random.uniform(0.5, 0.7)
+            avg_speed = 15.
+        self.config.update({"vehicles_density": vehicles_density, })
+        self.config.update({"avg_speed": avg_speed, })
+
         self._create_road()
         self._create_vehicles()
 
@@ -140,8 +150,6 @@ class ExitEnv(HighwayEnv):
 #     def default_config(cls) -> dict:
 #         return dict(super().default_config(),
 #                     observation=dict(type="LidarObservation"))
-
-
 
 
 register(
