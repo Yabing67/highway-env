@@ -24,16 +24,18 @@ class ExitEnv(HighwayEnv):
             },
             "action": {
                 "type": "DiscreteMetaAction",
+                # "longitudinal": False,
+                # "lateral": True,
             },
-            "lanes_count": 6,
-            "collision_reward": 0,
+            "lanes_count": 3,
+            "collision_reward": 0.1,
             "high_speed_reward": 0.1,
             "right_lane_reward": 0,
             "goal_reward": 1,
-            "vehicles_count": 20,
+            "vehicles_count": 3,
             "vehicles_density": 1.5,
             "controlled_vehicles": 1,
-            "duration": 18,  # [s],
+            "duration": 200,  # [s],
             "simulation_frequency": 5,
             "scaling": 5
         })
@@ -58,7 +60,10 @@ class ExitEnv(HighwayEnv):
         info.update({"is_success": self._is_success()})
         return obs, reward, terminal, info
 
-    def _create_road(self, road_length=1000, exit_position=400, exit_length=100) -> None:
+    def _create_road(self, road_length=1600, exit_position=1400, exit_length=100) -> None:
+        init_distance = 5
+        net = RoadNetwork.straight_road_network(self.config["lanes_count"], start=0,
+                                                length=init_distance, nodes_str=("-1", "0"))
         net = RoadNetwork.straight_road_network(self.config["lanes_count"], start=0,
                                                 length=exit_position, nodes_str=("0", "1"))
         net = RoadNetwork.straight_road_network(self.config["lanes_count"] + 1, start=exit_position,
@@ -87,12 +92,13 @@ class ExitEnv(HighwayEnv):
     def _create_vehicles(self) -> None:
         """Create some new random vehicles of a given type, and add them on the road."""
         self.controlled_vehicles = []
+        lane_id_ego = np.random.randint(2)
         for _ in range(self.config["controlled_vehicles"]):
             vehicle = self.action_type.vehicle_class.create_random(self.road,
-                                                                   speed=25,
-                                                                   lane_from="0",
-                                                                   lane_to="1",
-                                                                   lane_id=0,
+                                                                   speed=20,
+                                                                   lane_from="-1",
+                                                                   lane_to="0",
+                                                                   lane_id=lane_id_ego,
                                                                    spacing=self.config["ego_spacing"])
             vehicle.SPEED_MIN = 18
             self.controlled_vehicles.append(vehicle)
@@ -142,7 +148,8 @@ class ExitEnv(HighwayEnv):
 
     def _is_terminal(self) -> bool:
         """The episode is over if the ego vehicle crashed or the time is out."""
-        return self.vehicle.crashed or self.steps >= self.config["duration"]
+        print(self.vehicle.position[0])
+        return self.vehicle.crashed or self.steps >= self.config["duration"] or self.vehicle.position[0] > 1450
 
 
 # class DenseLidarExitEnv(DenseExitEnv):

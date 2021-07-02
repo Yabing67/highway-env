@@ -289,7 +289,7 @@ env_kwargs = {
     'id': 'exit-v0',
     'config': {
         "lanes_count": 3,
-        "vehicles_count": 15,
+        "vehicles_count": 3,
         "observation": {
             "type": "Kinematics",
             "vehicles_count": 10,
@@ -305,7 +305,7 @@ env_kwargs = {
             "absolute": False
         },
         "policy_frequency": 2,
-        "duration": 40,
+        "duration": 100,
     }
 }
 
@@ -329,13 +329,13 @@ if __name__ == "__main__":
                     learning_rate=2e-3,
                     policy_kwargs=policy_kwargs,
                     verbose=2,
-                    tensorboard_log="./exit_attention_ppo_easy/")
+                    tensorboard_log="./exit_attention_ppo_easyv2/")
         # Train the agent
         model.learn(total_timesteps=200*1000)
         # Save the agent
-        model.save("ppo-exit_easy")
+        model.save("ppo-exit_easyv2")
 
-    model = PPO.load("ppo-exit_easy")
+    model = PPO.load("ppo-exit_easyv2")
     env = make_configure_env(**env_kwargs)
     for _ in range(5):
         obs = env.reset()
