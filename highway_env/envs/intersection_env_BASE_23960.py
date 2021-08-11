@@ -9,7 +9,6 @@ from highway_env.road.lane import LineType, StraightLane, CircularLane, Abstract
 from highway_env.road.regulation import RegulatedRoad
 from highway_env.road.road import RoadNetwork
 from highway_env.vehicle.kinematics import Vehicle
-from highway_env.vehicle.controller import ControlledVehicle
 
 
 class IntersectionEnv(AbstractEnv):
@@ -56,7 +55,6 @@ class IntersectionEnv(AbstractEnv):
             "collision_reward": -5,
             "high_speed_reward": 1,
             "arrived_reward": 1,
-            "reward_speed_range": [7.0, 9.0],
             "normalize_reward": False
         })
         return config
@@ -67,10 +65,8 @@ class IntersectionEnv(AbstractEnv):
                / len(self.controlled_vehicles)
 
     def _agent_reward(self, action: int, vehicle: Vehicle) -> float:
-        scaled_speed = utils.lmap(self.vehicle.speed, self.config["reward_speed_range"], [0, 1])
         reward = self.config["collision_reward"] * vehicle.crashed \
-                 + self.config["high_speed_reward"] * np.clip(scaled_speed, 0, 1)
-
+                 + self.config["high_speed_reward"] * (vehicle.speed_index == vehicle.SPEED_COUNT - 1)
         reward = self.config["arrived_reward"] if self.has_arrived(vehicle) else reward
         if self.config["normalize_reward"]:
             reward = utils.lmap(reward, [self.config["collision_reward"], self.config["arrived_reward"]], [0, 1])
@@ -191,16 +187,13 @@ class IntersectionEnv(AbstractEnv):
                              self.road,
                              ego_lane.position(60 + 5*self.np_random.randn(1), 0),
                              speed=ego_lane.speed_limit,
-                             heading=ego_lane.heading_at(60))
-            try:
-                ego_vehicle.plan_route_to(destination)
-                ego_vehicle.SPEED_MIN = 0
-                ego_vehicle.SPEED_MAX = self.config["reward_speed_range"][1]
-                ego_vehicle.SPEED_COUNT = 3
-                ego_vehicle.speed_index = ego_vehicle.speed_to_index(ego_lane.speed_limit)
-                ego_vehicle.target_speed = ego_vehicle.index_to_speed(ego_vehicle.speed_index)
-            except AttributeError:
-                pass
+                             heading=ego_lane.heading_at(60)) \
+                .plan_route_to(destination)
+            ego_vehicle.SPEED_MIN = 0
+            ego_vehicle.SPEED_MAX = 9
+            ego_vehicle.SPEED_COUNT = 3
+            ego_vehicle.speed_index = ego_vehicle.speed_to_index(ego_lane.speed_limit)
+            ego_vehicle.target_speed = ego_vehicle.index_to_speed(ego_vehicle.speed_index)
 
             self.road.vehicles.append(ego_vehicle)
             self.controlled_vehicles.append(ego_vehicle)
