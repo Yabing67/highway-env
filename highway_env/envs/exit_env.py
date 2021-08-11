@@ -18,7 +18,7 @@ class ExitEnv(HighwayEnv):
         config.update({
             "observation": {
                 "type": "ExitObservation",
-                "vehicles_count": 15,
+                "vehicles_count": 5,
                 "features": ["presence", "x", "y", "vx", "vy", "cos_h", "sin_h"],
                 "clip": False
             },
@@ -28,14 +28,14 @@ class ExitEnv(HighwayEnv):
                 # "lateral": True,
             },
             "lanes_count": 3,
-            "collision_reward": 0.1,
+            "collision_reward": 0,
             "high_speed_reward": 0.1,
             "right_lane_reward": 0,
             "goal_reward": 1,
-            "vehicles_count": 3,
+            "vehicles_count": 5,
             "vehicles_density": 1.5,
             "controlled_vehicles": 1,
-            "duration": 200,  # [s],
+            "duration": 100,  # [s],
             "simulation_frequency": 5,
             "scaling": 5
         })
@@ -60,12 +60,12 @@ class ExitEnv(HighwayEnv):
         info.update({"is_success": self._is_success()})
         return obs, reward, terminal, info
 
-    def _create_road(self, road_length=1600, exit_position=1400, exit_length=100) -> None:
+    def _create_road(self, road_length=1200, exit_position=800, exit_length=100) -> None:
         init_distance = 5
         net = RoadNetwork.straight_road_network(self.config["lanes_count"], start=0,
                                                 length=init_distance, nodes_str=("-1", "0"))
-        net = RoadNetwork.straight_road_network(self.config["lanes_count"], start=0,
-                                                length=exit_position, nodes_str=("0", "1"))
+        net = RoadNetwork.straight_road_network(self.config["lanes_count"], start=init_distance,
+                                                length=exit_position, nodes_str=("0", "1"), net=net)
         net = RoadNetwork.straight_road_network(self.config["lanes_count"] + 1, start=exit_position,
                                                 length=exit_length, nodes_str=("1", "2"), net=net)
         net = RoadNetwork.straight_road_network(self.config["lanes_count"], start=exit_position+exit_length,
@@ -148,8 +148,8 @@ class ExitEnv(HighwayEnv):
 
     def _is_terminal(self) -> bool:
         """The episode is over if the ego vehicle crashed or the time is out."""
-        print(self.vehicle.position[0])
-        return self.vehicle.crashed or self.steps >= self.config["duration"] or self.vehicle.position[0] > 1450
+        # print(self.vehicle.position[0])
+        return self.vehicle.crashed or self.steps >= self.config["duration"] or self.vehicle.position[0] > 850
 
 
 # class DenseLidarExitEnv(DenseExitEnv):

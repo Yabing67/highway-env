@@ -21,3 +21,9 @@ _build
 
 # Outputs
 **/out/*
+scripts/**/*.zip
+*2021*/
+*exit_attention_ppo*/
+.gitignore.swp
+
+

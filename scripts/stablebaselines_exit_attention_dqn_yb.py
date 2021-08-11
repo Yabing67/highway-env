@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 """
 -------------------------------------------------
-   File Name：     stablebaselines_exit_attention_ppo_yb
+   File Name：     stablebaselines_exit_attention_dqn_yb
    Description :
    Author :       yabing
-   date：          2021/5/5
+   date：          2021/7/28
 -------------------------------------------------
 
 """
 
 import gym
 import torch as th
-from stable_baselines3 import PPO
+from stable_baselines3 import DQN
 from torch.distributions import Categorical
 import torch
 import torch.nn as nn
@@ -256,7 +256,7 @@ def attention(query, key, value, mask=None, dropout=None):
 attention_network_kwargs = dict(
     in_size=5*15,
     embedding_layer_kwargs={"in_size": 7, "layer_sizes": [64, 64], "reshape": False},
-    attention_layer_kwargs={"feature_size": 64, "heads": 1},
+    attention_layer_kwargs={"feature_size": 64, "heads": 2},
 )
 
 
@@ -326,19 +326,18 @@ if __name__ == "__main__":
             features_extractor_kwargs=attention_network_kwargs,
         )
         env = make_vec_env(make_configure_env, n_envs=n_cpu, seed=0, vec_env_cls=SubprocVecEnv, env_kwargs=env_kwargs)
-        model = PPO("MlpPolicy", env,
-                    n_steps=512 // n_cpu,
+        model = DQN("MlpPolicy", env,
                     batch_size=64,
                     learning_rate=2e-3,
                     policy_kwargs=policy_kwargs,
                     verbose=2,
-                    tensorboard_log="./exit_attention_ppo_20210731_1h/")
+                    tensorboard_log="./exit_attention_dqn_20210728/")
         # Train the agent
         model.learn(total_timesteps=200*1000)
         # Save the agent
-        model.save("ppo-exit_20210731_1h")
+        model.save("dqn-exit_20210728")
 
-    model = PPO.load("ppo-exit_20210731_1h")
+    model = DQN.load("dqn-exit_20210728")
     env = make_configure_env(**env_kwargs)
     env.configure({"offscreen_rendering": True})
     collisions = 0
